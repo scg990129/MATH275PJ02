@@ -16,6 +16,7 @@ public class City implements Comparable<City> {
     private final char label;
     private final int x;
     private final int y;
+
     public City(String name, char label, int x, int y) {
         this.name = name;
         this.label = Character.toUpperCase(label);
@@ -24,7 +25,19 @@ public class City implements Comparable<City> {
     }
 
     public static Map<Character, City> getCitiesInstance() {
-        return new TreeMap<>(cities);
+        TreeMap<Character, City> tree = new TreeMap<>(new City.ComparatorCityLabel());
+        tree.putAll(cities);
+        return tree;
+    }
+
+    public static double distanceTo(City city1, City city2) {
+        return Math.sqrt(distanceEigenvalue(city1, city2));
+    }
+
+    public static int distanceEigenvalue(City city1, City city2) {
+        int dx = (city1.x - city2.x);
+        int dy = (city1.y - city2.y);
+        return dx * dx + dy * dy;
     }
 
     public String getName() {
@@ -52,16 +65,6 @@ public class City implements Comparable<City> {
         return String.format("%s %c (%d, %d)", name, label, x, y);
     }
 
-    public static double distanceTo(City city1, City city2) {
-        return Math.sqrt(distanceEigenvalue(city1, city2));
-    }
-
-    public static int distanceEigenvalue(City city1, City city2){
-        int dx = (city1.x - city2.x);
-        int dy = (city1.y - city2.y);
-        return dx * dx + dy * dy;
-    }
-
     public int compareTo(City other) {
         return Character.compare(this.label, other.label);
     }
@@ -81,7 +84,7 @@ public class City implements Comparable<City> {
         }
     }
 
-    public class ComparatorCityLabel implements Comparator<Character> {
+    public static class ComparatorCityLabel implements Comparator<Character> {
 
         @Override
         public int compare(Character o1, Character o2) {

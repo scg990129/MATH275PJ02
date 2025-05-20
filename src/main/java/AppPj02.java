@@ -92,11 +92,18 @@ public class AppPj02 {
         }
         formattedLogger.logf(sb.toString());
 
-        formattedLogger.warningf("TSP algorithms: \n");
+        formattedLogger.logf("TSP algorithms: \n");
         formattedLogger.warningf("1. Brute Force Algorithm\n");
-        LinkedHashSet<City> citiesSet = new LinkedHashSet<>(cities.values());
-
-        // for(char label = 'A'; )
+        SequencedSet<AbstractSequentialList<City>> combinations = generatePermutations(new LinkedHashMap<>(cities));
+        sb.setLength(0);
+        for (AbstractSequentialList<City> combination : combinations) {
+            for(City city : combination) {
+                sb.append(String.format("%c ", city.getLabel()));
+            }
+            sb.append('\n');
+        }
+        formattedLogger.infof("%d combinations of %d cities: \n%s\n",
+                combinations.size(), cities.size(), sb.toString());
 
 
 //        formattedLogger.warningf("2. Nearest Neighbor Algorithm (Greedy)\n");
@@ -110,6 +117,25 @@ public class AppPj02 {
 
     }
 
+    public static SequencedSet<AbstractSequentialList<City>> generatePermutations(SequencedMap<Character, City> availableCitiesList) {
+        if (availableCitiesList.size() == 1) {
+            LinkedList<City> result = new LinkedList<>(availableCitiesList.values());
+            SequencedSet<AbstractSequentialList<City>> set = new LinkedHashSet<>();
+            set.add(result);
+            return set;
+        }
+        SequencedSet<AbstractSequentialList<City>> result = new LinkedHashSet<>();
+        Character[] labels = availableCitiesList.keySet().toArray(Character[]::new);
+        for(Character c: labels){
+            SequencedMap<Character, City> availableCitiesListCopy = new LinkedHashMap<>(availableCitiesList);
+            City city = availableCitiesListCopy.remove(c);
+            for(AbstractSequentialList<City> t : generatePermutations(availableCitiesListCopy)){
+                t.add(city);
+                result.add(t);
+            }
+        }
+        return result;
+    }
 
     public static void createDistanceGIU() {
         String[] citiesTitle = new String[cities.size()];
