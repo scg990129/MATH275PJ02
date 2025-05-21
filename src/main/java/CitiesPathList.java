@@ -10,11 +10,11 @@ public class CitiesPathList extends LinkedList<City> {
 
     public CitiesPathList(Collection<? extends City> c) {
         super(c);
-        returnCity = this.getFirst();
     }
 
-    public City getReturnCity() {
-        return returnCity;
+    public CitiesPathList addCity(City city) {
+        this.add(city);
+        return this;
     }
 
     public double getTotalDistance() {
@@ -29,7 +29,7 @@ public class CitiesPathList extends LinkedList<City> {
     }
 
     public double getTotalDistanceWithReturn() {
-        return this.getTotalDistance() + City.distanceTo(this.getLast(), returnCity);
+        return this.getTotalDistance() + City.distanceTo(this.getLast(), this.getFirst());
     }
 
     @Override
