@@ -94,17 +94,54 @@ public class AppPj02 {
 
         formattedLogger.logf("TSP algorithms: \n");
         formattedLogger.warningf("1. Brute Force Algorithm\n");
-        SequencedSet<AbstractSequentialList<City>> combinations = generatePermutations(new LinkedHashMap<>(cities));
-        sb.setLength(0);
-        for (AbstractSequentialList<City> combination : combinations) {
-            for(City city : combination) {
-                sb.append(String.format("%c ", city.getLabel()));
-            }
-            sb.append('\n');
-        }
-        formattedLogger.infof("%d combinations of %d cities: \n%s\n",
-                combinations.size(), cities.size(), sb.toString());
 
+        SequencedSet<CitiesPathList> combinations = generatePermutations(new LinkedHashMap<>(cities));
+        sb.setLength(0);
+        List<CitiesPathList> bestCombination = new LinkedList<>();
+        Optional<Double> bestDistance = Optional.empty();
+        List<CitiesPathList> bestCombinationWithReturn = new LinkedList<>();
+        Optional<Double> bestDistanceWithReturn = Optional.empty();
+        for (CitiesPathList combination : combinations) {
+            double totalDistance = combination.getTotalDistance();
+            double totalDistanceWithReturn = combination.getTotalDistanceWithReturn();
+
+            int doubleCompare = Double.compare(totalDistance, bestDistance.orElse(Double.MAX_VALUE));
+            if (bestCombination.isEmpty() || doubleCompare <= 0) {
+                if(doubleCompare != 0)
+                    bestCombination.clear();
+
+                bestCombination.add(combination);
+                bestDistance = Optional.of(totalDistance);
+            }
+            doubleCompare = Double.compare(totalDistanceWithReturn, bestDistanceWithReturn.orElse(Double.MAX_VALUE));
+            if (bestCombinationWithReturn.isEmpty() || doubleCompare <= 0) {
+                if(doubleCompare != 0)
+                    bestCombinationWithReturn.clear();
+
+                bestCombinationWithReturn.add(combination);
+                bestDistanceWithReturn = Optional.of(totalDistanceWithReturn);
+            }
+
+            sb.append(String.format("%s (return city: %c): %6.4f (with return: %6.4f)\n",
+                    combination, combination.getFirst().getLabel(),
+                    totalDistance, totalDistanceWithReturn
+            ));
+        }
+        formattedLogger.infof("%d path combinations of %d cities: \n%s\n",
+                combinations.size(), cities.size(), sb.toString().trim());
+        StringBuilder stringBuilder = new StringBuilder();
+        for (CitiesPathList combination : bestCombinationWithReturn) {
+            stringBuilder.append(String.format("%s (return to: %c): %6.4f\n",
+                    combination.toString(), combination.getReturnCity().getLabel(),
+                    bestDistanceWithReturn.get().doubleValue()
+            ));
+        }
+        formattedLogger.infof("\nThe best %d path is (with distance: %6.4f):\n%s\n" +
+                        "The best %d path for start and return: \n%s",
+                bestCombination.size(), bestDistance.get().doubleValue(),
+                bestCombination.toString().replace(",", ",\n"),
+                bestCombinationWithReturn.size(), stringBuilder.toString().trim()
+        );
 
 //        formattedLogger.warningf("2. Nearest Neighbor Algorithm (Greedy)\n");
 //
@@ -117,19 +154,29 @@ public class AppPj02 {
 
     }
 
-    public static SequencedSet<AbstractSequentialList<City>> generatePermutations(SequencedMap<Character, City> availableCitiesList) {
+//    public static double distance(AbstractSequentialList<City> path) {
+//        double totalDistance = 0;
+//        for (int i = 0; i < path.size() - 1; i++) {
+//            City city1 = path.get(i);
+//            City city2 = path.get(i + 1);
+//            totalDistance += City.distanceTo(city1, city2);
+//        }
+//        return totalDistance;
+//    }
+
+    public static SequencedSet<CitiesPathList> generatePermutations(SequencedMap<Character, City> availableCitiesList) {
         if (availableCitiesList.size() == 1) {
-            LinkedList<City> result = new LinkedList<>(availableCitiesList.values());
-            SequencedSet<AbstractSequentialList<City>> set = new LinkedHashSet<>();
+            CitiesPathList result = new CitiesPathList(availableCitiesList.values());
+            SequencedSet<CitiesPathList> set = new LinkedHashSet<>();
             set.add(result);
             return set;
         }
-        SequencedSet<AbstractSequentialList<City>> result = new LinkedHashSet<>();
+        SequencedSet<CitiesPathList> result = new LinkedHashSet<>();
         Character[] labels = availableCitiesList.keySet().toArray(Character[]::new);
         for(Character c: labels){
             SequencedMap<Character, City> availableCitiesListCopy = new LinkedHashMap<>(availableCitiesList);
             City city = availableCitiesListCopy.remove(c);
-            for(AbstractSequentialList<City> t : generatePermutations(availableCitiesListCopy)){
+            for(CitiesPathList t : generatePermutations(availableCitiesListCopy)){
                 t.add(city);
                 result.add(t);
             }
