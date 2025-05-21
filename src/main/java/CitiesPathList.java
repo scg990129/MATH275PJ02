@@ -13,8 +13,18 @@ public class CitiesPathList extends LinkedList<City> {
         returnCity = this.getFirst();
     }
 
+    @Override
+    public void addFirst(City city) {
+        super.addFirst(returnCity = city);
+    }
+
     public City getReturnCity() {
         return returnCity;
+    }
+
+    public CitiesPathList addCity(City city) {
+        this.add(city);
+        return this;
     }
 
     public double getTotalDistance() {
