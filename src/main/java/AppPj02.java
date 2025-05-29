@@ -151,8 +151,7 @@ public class AppPj02 {
                 greedyPath.toString().replace(",", ",\n"),
                         greedyPath.getTotalDistance(), greedyPath.getTotalDistanceWithReturn()
                 );
-//
-//
+
 //        formattedLogger.warningf("1. Nearest Neighbor Algorithm (Greedy)\n");
 //        formattedLogger.warningf("2. Nearest Insertion Algorithm\n");
 //        formattedLogger.warningf("3. Farthest Insertion Algorithm\n");
@@ -161,6 +160,7 @@ public class AppPj02 {
 
     }
 
+    // double-ended nearest neighbor heuristic.
     public static CitiesPathList generatePermutationsNearestNeighborGreedy(Map<City, SortedSet<City>> sortedAdjacency, SequencedMap<Character, City> availableCitiesList){
         SequencedMap<Character, City> temp = new LinkedHashMap<>(availableCitiesList);
         City city1 = null, city2 = null ;
