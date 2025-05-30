@@ -159,11 +159,15 @@ public class AppPj02 {
         formattedLogger.infof("\n%s",sortedAdjacency.toString().replace("],","],\n"));
 
         CitiesPathList greedyPath = generatePermutationsNearestNeighborGreedy(sortedAdjacency, new LinkedHashMap<>(cities));
-        formattedLogger.infof("Greedy path: %s (distance / with return: %6.4f / %6.4f)\n",
+        formattedLogger.infof("Double-Ended Nearest Neighbor Greedy Algorithm: %s (distance / with return: %6.4f / %6.4f)\n",
                 greedyPath.toString().replace(",", ",\n"),
                         greedyPath.getTotalDistance(), greedyPath.getTotalDistanceWithReturn()
                 );
 
+        AlgorithmNearestNeighbor algorithmNearestNeighbor = new AlgorithmNearestNeighbor(
+                cities.get('A'), new LinkedHashMap<>(cities));
+        formattedLogger.infof("3. Standard Nearest Neighbor Algorithm (Greedy)\n%s\n",
+                algorithmNearestNeighbor.toString());
 
 //        formattedLogger.warningf("1. Nearest Neighbor Algorithm (Greedy)\n");
 //        formattedLogger.warningf("2. Nearest Insertion Algorithm\n");
