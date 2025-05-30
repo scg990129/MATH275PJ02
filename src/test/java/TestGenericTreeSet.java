@@ -25,8 +25,18 @@ public class TestGenericTreeSet {
         treeSet.addAll(cityA, cityB, cityC, cityD, cityE, cityF, cityG, cityH,
                 cityI, cityJ, cityK, cityL, cityM, cityN, cityO);
 
+        double distance = 0;
+        City previousCity = null;
         for (City city : treeSet) {
             System.out.println(city);
+            distance += previousCity == null ? 0 : City.distanceTo(previousCity, city);
+            previousCity = city;
         }
+        distance += City.distanceTo(previousCity, treeSet.getFirst());
+
+        System.out.println("Total cities in the tree set: " + treeSet.size());
+        System.out.println("Total distance in the tree set: " + treeSet.getDistance());
+        System.out.println("toString(): " + treeSet.toString());
+
     }
 }

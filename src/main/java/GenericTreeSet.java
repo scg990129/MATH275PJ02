@@ -1,5 +1,6 @@
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GenericTreeSet extends AbstractSet<City> implements Iterable<City>{
 
@@ -9,6 +10,10 @@ public class GenericTreeSet extends AbstractSet<City> implements Iterable<City>{
     @Override
     public Iterator<City> iterator() { // Depth-First Search (DFS)
         return root == null? Collections.emptyIterator() : root.iterator();
+    }
+
+    public City getFirst() {
+        return root == null ? null : root.getCity();
     }
 
     public boolean addAll(City root, City... cities) {
@@ -103,5 +108,31 @@ public class GenericTreeSet extends AbstractSet<City> implements Iterable<City>{
                 throw new NoSuchElementException();
             }
         }
+    }
+
+    public double getDistance() {
+        double distance = 0;
+        if (root == null) return distance;
+
+        City previousCity = null;
+        for (City city : this) {
+            if (previousCity != null) {
+                distance += City.distanceTo(previousCity, city);
+            }
+            previousCity = city;
+        }
+        // Connect the last city to the first
+        if (previousCity != null && root.getCity() != null) {
+            distance += City.distanceTo(previousCity, root.getCity());
+        }
+        return distance;
+    }
+
+    public String toString() {
+        return String.format("[%s] with return %s",
+                this.stream()
+                        .map(String::valueOf).collect(Collectors.joining(", ")),
+                this.root == null ? "null" : this.root.getCity()
+        );
     }
 }
