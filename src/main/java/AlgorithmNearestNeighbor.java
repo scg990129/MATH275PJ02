@@ -8,13 +8,15 @@ public class AlgorithmNearestNeighbor {
     protected AbstractSequentialList<City> cityList;
     protected double totalDistance = 0.0f;
 
-    public AlgorithmNearestNeighbor( City startCity, Map<Character, City> cityList) {
+    public AlgorithmNearestNeighbor(City startCity, Map<Character, City> cityList) {
         this.startCity = startCity;
-        SortedSet<City> cities = new TreeSet<>(new City.ComparatorCityDistance(this.startCity));
+//        SortedSet<City> cities = new TreeSet<>(new City.ComparatorCityDistance(this.startCity));
+        LinkedList<City> availableCities = new LinkedList<>();
 
         cityList.values().stream().parallel().filter(Predicate.not(this.startCity::equals))
-                .forEach(cities::add);
-        this.cityList = getPath(cities);
+                .forEach(availableCities::add);
+
+        this.cityList = getPath(this.startCity, availableCities);
         City previousCity = this.startCity;
         for(City city: this.cityList) {
             this.totalDistance += City.distanceTo(previousCity, city);
@@ -23,18 +25,40 @@ public class AlgorithmNearestNeighbor {
         this.totalDistance += City.distanceTo(previousCity, this.startCity); // Return to start city
     }
 
-    protected AbstractSequentialList<City> getPath(SortedSet<City> avalibleCities){
-        if (avalibleCities.size() == 1){ // base case
-            return new LinkedList<>(avalibleCities);
+    protected AbstractSequentialList<City> getPath(City previousCity, AbstractSequentialList<City> availableCities) {
+        if (availableCities.size() == 1) { // base case
+            return new LinkedList<>(availableCities);
         }
         // Recursive case
-        City selectedCity = avalibleCities.removeFirst();
-        SortedSet<City> nextAvailableCities = new TreeSet<>(new City.ComparatorCityDistance(selectedCity));
-        nextAvailableCities.addAll(avalibleCities);
-        AbstractSequentialList<City> path = getPath(nextAvailableCities);
-        path.addFirst(selectedCity);
-        return path;
+        City selectedCity = null;
+
+        AbstractSequentialList<City> availableCitiesNext = new LinkedList<>();
+        Comparator<City> comparator = new City.ComparatorCityDistance(previousCity);
+        for (Iterator<City> i = availableCities.iterator(); i.hasNext(); ) {
+            City tempCity = i.next();
+            if (selectedCity == null || comparator.compare(tempCity, selectedCity) < 0) {
+                if (selectedCity != null) {
+                    availableCitiesNext.add(selectedCity);
+                    i.remove();
+                }
+                selectedCity = tempCity;
+            }else {
+                availableCitiesNext.add(tempCity);
+            }
+        }
+//            SortedSet<City> nextAvailableCities = new TreeSet<>(new City.ComparatorCityDistance(tempCity));
+//            nextAvailableCities.addAll(availableCities);
+//            nextAvailableCities.remove(tempCity); // Remove current city from available cities
+//            AbstractSequentialList<City> subPath = getPath(tempCity, nextAvailableCities);
+//            subPath.addFirst(tempCity);
+//            if (path.isEmpty() || City.distanceTo(previousCity, subPath.getFirst()) < City.distanceTo(previousCity, path.getFirst())) {
+//                path = new LinkedList<>(subPath);
+//            }
+        AbstractSequentialList<City> answer = getPath(selectedCity,  availableCitiesNext);
+        answer.addFirst(selectedCity);
+        return answer;
     }
+
 
     public City getStartnReturnCity(){
         return startCity;

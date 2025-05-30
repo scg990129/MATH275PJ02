@@ -38,8 +38,8 @@ public class City implements Comparable<City> {
     }
 
     public static int distanceEigenvalue(City city1, City city2) {
-        int dx = (city1.x - city2.x);
-        int dy = (city1.y - city2.y);
+        int dx = city1.x  -   city2.x ;
+        int dy =  city1.y   -   city2.y;
         return dx * dx + dy * dy;
     }
 
