@@ -15,8 +15,9 @@ public class AppPj02 {
     private static final String logDirectory = "logs";
     private static final Logger logger = Logger.getLogger(AppPj02.class.getName());
     private static final FormattedLogger formattedLogger = new FormattedLogger(logger);
+    private static final double epsilon = 1e-6;
 
-    public static double[][] distance;
+    public static double[][] adjacencyDistanceMatrix;
     public static Map<Character, City> cities;
     public static Map<City, SortedSet<City>> sortedAdjacency = new TreeMap<>();
     public static JFrame frameTSPDistanceMatrix;
@@ -43,22 +44,22 @@ public class AppPj02 {
         formattedLogger.logf("We have the following cities: \n%s", String.format("%s",cities = City.getCitiesInstance()).replace("),", "),\n"));
 
         formattedLogger.logf("The distance between the cities is given by the following matrix:");
-        distance = new double[cities.size()][cities.size()];
+        adjacencyDistanceMatrix = new double[cities.size()][cities.size()];
 
         for (Character keyRow : cities.keySet()) {
             City row = cities.get(keyRow);
             for (Character keyCol : cities.keySet()) {
                 City col = cities.get(keyCol);
-                distance[row.getLabelNo()][col.getLabelNo()] = City.distanceTo(row, col);
+                adjacencyDistanceMatrix[row.getLabelNo()][col.getLabelNo()] = City.distanceTo(row, col);
             }
         }
 
         StringBuilder sb = new StringBuilder().append('\n');
-        for (int i = 0; i < distance.length; i++) {
+        for (int i = 0; i < adjacencyDistanceMatrix.length; i++) {
 //            System.out.printf("%s ", cities.keySet().toArray()[i]);
             sb.append(String.format("%s ", cities.keySet().toArray()[i]));
-            for (int j = 0; j < distance[i].length; j++) {
-                sb.append(String.format("%8.4f ", distance[i][j]));
+            for (int j = 0; j < adjacencyDistanceMatrix[i].length; j++) {
+                sb.append(String.format("%8.4f ", adjacencyDistanceMatrix[i][j]));
 //                System.out.printf("%8.4f ", distance[i][j]);
             }
             sb.append('\n');
@@ -67,6 +68,12 @@ public class AppPj02 {
 
         formattedLogger.logf("The distance matrix is shown in the GUI.");
         SwingUtilities.invokeLater(AppPj02::createDistanceGIU);
+        SwingUtilities.invokeLater(() -> {});
+        javax.swing.SwingUtilities.invokeLater(() -> {
+                    JFrameWeightedGraph app = new JFrameWeightedGraph(cities, adjacencyDistanceMatrix);});
+//            JGraphTCityGraphVisualizer app = new JGraphTCityGraphVisualizer("TSP City Graph Visualization - Undirected AND Weight Graph", graph);
+//            app.setVisible(true);
+//        });
 
         formattedLogger.logf("Create Adjacency list");
         for(City city : cities.values()) {
@@ -105,7 +112,7 @@ public class AppPj02 {
             double totalDistance = combination.getTotalDistance();
             double totalDistanceWithReturn = combination.getTotalDistanceWithReturn();
 
-            int doubleCompare = Double.compare(totalDistance, bestDistance.orElse(Double.MAX_VALUE));
+            int doubleCompare = City.compareDistance(totalDistance, bestDistance.orElse(Double.MAX_VALUE));
             if (bestCombination.isEmpty() || doubleCompare <= 0) {
                 if(doubleCompare != 0)
                     bestCombination.clear();
@@ -113,10 +120,14 @@ public class AppPj02 {
                 bestCombination.add(combination);
                 bestDistance = Optional.of(totalDistance);
             }
-            doubleCompare = Double.compare(totalDistanceWithReturn, bestDistanceWithReturn.orElse(Double.MAX_VALUE));
+            doubleCompare = City.compareDistance(totalDistanceWithReturn, bestDistanceWithReturn.orElse(Double.MAX_VALUE));
             if (bestCombinationWithReturn.isEmpty() || doubleCompare <= 0) {
-                if(doubleCompare != 0)
+                if(doubleCompare != 0){
                     bestCombinationWithReturn.clear();
+//                    formattedLogger.warningf("totalDistanceWithReturn (%d): %f, %f, %s, %f",doubleCompare, totalDistanceWithReturn, bestDistanceWithReturn.orElse(Double.MAX_VALUE), String.valueOf( combination),
+//                            bestDistanceWithReturn.orElse(Double.MAX_VALUE) - totalDistanceWithReturn
+//                            );
+                }
 
                 bestCombinationWithReturn.add(combination);
                 bestDistanceWithReturn = Optional.of(totalDistanceWithReturn);
@@ -133,17 +144,18 @@ public class AppPj02 {
         for (CitiesPathList combination : bestCombinationWithReturn) {
             stringBuilder.append(String.format("%s (return to: %c): %6.4f\n",
                     combination.toString(), combination.getFirst().getLabel(),
-                    bestDistanceWithReturn.get().doubleValue()
+                    bestDistanceWithReturn.get()
             ));
         }
+        // D F E B C A
         formattedLogger.infof("\nThe best %d path is (with distance: %6.4f):\n%s\n" +
-                        "The best %d path for start and return: \n%s",
+                        "The best %d cycles for start and return: \n%s",
                 bestCombination.size(), bestDistance.get().doubleValue(),
                 bestCombination.toString().replace(",", ",\n"),
                 bestCombinationWithReturn.size(), stringBuilder.toString().trim()
         );
 
-        formattedLogger.infof("2. Nearest Neighbor Algorithm (Greedy)");
+        formattedLogger.infof("2. Double-Ended Nearest Neighbor Greedy Algorithm (Greedy)");
         formattedLogger.infof("\n%s",sortedAdjacency.toString().replace("],","],\n"));
 
         CitiesPathList greedyPath = generatePermutationsNearestNeighborGreedy(sortedAdjacency, new LinkedHashMap<>(cities));
@@ -151,6 +163,7 @@ public class AppPj02 {
                 greedyPath.toString().replace(",", ",\n"),
                         greedyPath.getTotalDistance(), greedyPath.getTotalDistanceWithReturn()
                 );
+
 
 //        formattedLogger.warningf("1. Nearest Neighbor Algorithm (Greedy)\n");
 //        formattedLogger.warningf("2. Nearest Insertion Algorithm\n");
@@ -254,7 +267,7 @@ public class AppPj02 {
         for (int i = 0; i < citiesTitle.length; i++) {
             tableData[i][0] = citiesTitle[i]; // row header
             for (int j = 0; j < citiesTitle.length; j++) {
-                tableData[i][j + 1] = distance[i][j];
+                tableData[i][j + 1] = adjacencyDistanceMatrix[i][j];
             }
         }
 

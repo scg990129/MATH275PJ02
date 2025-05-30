@@ -1,17 +1,21 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class AllPermutations {
+public class Q915 {
     public static void main(String[] args) {
-        char[] elements = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
+        // 4♠, 4♦, 4♣, J♠, 8♥
+        char[] elements =  {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
+
+
         List<String> results = new ArrayList<>();
         permute(elements, 0, results);
 
         // Print all permutations
         AtomicInteger count = new AtomicInteger(0);
         results.stream().peek(s ->
-                count.addAndGet(s.indexOf("A") < 5 && s.indexOf("B") < 5 ||
-                        (s.indexOf("A") >= 5 && s.indexOf("B") >= 5) ? 1 : 0))
+                        count.addAndGet(s.indexOf("A") < 5 && s.indexOf("B") < 5 ||
+                                (s.indexOf("A") >= 5 && s.indexOf("B") >= 5) ? 1 : 0))
                 .forEachOrdered(System.out::println);
 
 //        for (String s : results) {

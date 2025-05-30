@@ -151,7 +151,7 @@ public class JGraphTCityGraphVisualizer extends JFrame {
         // 3. Create and show the GUI
         // This should be done on the Event Dispatch Thread (EDT) for Swing applications.
         javax.swing.SwingUtilities.invokeLater(() -> {
-            JGraphTCityGraphVisualizer app = new JGraphTCityGraphVisualizer("TSP City Graph Visualization", graph);
+            JGraphTCityGraphVisualizer app = new JGraphTCityGraphVisualizer("TSP City Graph Visualization - Undirected AND Weight Graph", graph);
             app.setVisible(true);
         });
     }

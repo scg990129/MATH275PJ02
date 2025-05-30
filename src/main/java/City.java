@@ -3,6 +3,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class City implements Comparable<City> {
+    protected static final double EPSILON = 1e-6;
+
+
     private static final Map<Character, City> cities =
             Map.of(
                     'A', new City("Central", 'A', 0, 0),
@@ -90,5 +93,9 @@ public class City implements Comparable<City> {
         public int compare(Character o1, Character o2) {
             return Character.compare(Character.toUpperCase(o1), Character.toUpperCase(o2));
         }
+    }
+
+    public static int compareDistance(double d1, double d2) {
+        return Math.abs(d1 - d2) < EPSILON ? 0 : Double.compare(d1, d2);
     }
 }
