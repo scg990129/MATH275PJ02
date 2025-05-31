@@ -1,0 +1,186 @@
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+public class AlgorithmMSP implements Iterable<City> {
+
+    protected Node root;
+    protected Map<City, Node> rapidSet = new LinkedHashMap<>();
+    protected int sizeWithoutReturn = 0;
+    protected double totalDistance = 0.0f;
+
+    // Prim-Based MSP
+    public AlgorithmMSP(City startCity, Map <Character, City> availableCities) {
+        rapidSet.put(startCity, this.root = new Node(startCity));
+        sizeWithoutReturn = availableCities.size();
+
+        PriorityQueue <Edge> priorityQueue = new PriorityQueue<>();
+        Set<City> unvisitedCities = new HashSet<>();
+        availableCities.values().parallelStream().filter(Predicate.not(startCity::equals))
+                .map( city -> new Edge(startCity, city))
+                .sequential().peek(priorityQueue::add)
+                .map(Edge::getTarget).forEach(unvisitedCities::add);
+
+        initialMinimumSpanningTree(priorityQueue, unvisitedCities);
+    }
+
+    protected void initialMinimumSpanningTree(PriorityQueue<Edge> priorityQueue, Set<City> unvisitedCities) {
+        if (unvisitedCities == null || unvisitedCities.isEmpty()) {
+            return; // No more edges or cities to visit
+        }
+
+        Edge edge = priorityQueue.poll();
+        City target = edge.getTarget();
+        if (!unvisitedCities.removeIf(target::equals)) {
+            initialMinimumSpanningTree(priorityQueue, unvisitedCities);
+        } else {
+            Node node = new Node(target);
+            rapidSet.put(target,node);
+            rapidSet.get(edge.getSource()).getEdges().add(node);
+            unvisitedCities.parallelStream().map(city -> new Edge(target, city))
+                    .forEach(priorityQueue::add);
+            initialMinimumSpanningTree(priorityQueue, unvisitedCities);
+        }
+    }
+
+    public int size() {
+        return rapidSet.size() + (root == null ? 0 : 1);
+    }
+
+    public double getTotalDistance(){
+        return totalDistance <= 0.0f ? calculateTotalDistance() : totalDistance;
+    }
+
+    private double calculateTotalDistance() {
+        double totalDistance = 0.0f;
+        City previousCity = null;
+        for(City city : this) {
+            totalDistance += previousCity != null? City.distanceTo(previousCity, city) : 0.0f;
+            previousCity = city;
+        }
+        totalDistance += City.distanceTo(previousCity, root.getCity()); // Return to start city
+        // Connect the last city to the first
+        return totalDistance;
+    }
+
+    @Override
+    public Iterator<City> iterator() {
+        return root == null? Collections.emptyIterator() : root.iterator();
+    }
+
+    public static class Edge implements Comparable<Edge> {
+        private final City source;
+        private final City target;
+        private final int distanceEigenValue;
+
+        public Edge(City source, City target) {
+            this.source = source;
+            this.target = target;
+            this.distanceEigenValue = City.distanceEigenValue(source, target);
+        }
+
+        public City getSource() {
+            return source;
+        }
+
+        public City getTarget() {
+            return target;
+        }
+
+        public double getDistanceEigenValue() {
+            return distanceEigenValue;
+        }
+
+        @Override
+        public int compareTo(Edge other) {
+            int distanceComparison = Integer.compare(this.distanceEigenValue, other.distanceEigenValue);
+            return distanceComparison != 0 ?
+                    distanceComparison: this.equals(other) ? 0 :
+                    this.source.getLabel() != other.source.getLabel() ?
+                            Character.compare(this.source.getLabel(), other.source.getLabel()) :
+                            Integer.compare(
+                                    Math.abs(this.source.getLabel() - this.target.getLabel()),
+                                    Math.abs(other.source.getLabel() - other.target.getLabel())
+                            );
+        }
+
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Edge)) return false;
+            Edge edge = (Edge) o;
+            return (Objects.equals(source, edge.source) && Objects.equals(target, edge.target)) ||
+                   (Objects.equals(source, edge.target) && Objects.equals(target, edge.source));
+        }
+    }
+
+    protected class Node implements Iterable<City> {
+
+        City city;
+        AbstractSet<Node> edges;
+
+        public AbstractSet<Node> getNodes(){
+            return edges;
+        }
+
+        public Node(City city) {
+            this.city = city;
+            edges = new LinkedHashSet<>();
+        }
+
+        public AbstractSet<Node> getEdges(){
+            return edges;
+        }
+
+        public City getCity() { return city; }
+
+        @Override
+        public Iterator<City> iterator() {
+            return new Node.NodeIterator();
+        }
+
+        public class NodeIterator implements Iterator<City> {
+
+            protected Iterator<Node> edgeIterator = null;
+            protected Iterator<City> innerIterator = null;
+
+            @Override
+            public boolean hasNext() {
+                return edgeIterator == null || edgeIterator.hasNext() || (innerIterator != null && innerIterator.hasNext());
+            }
+
+            @Override
+            public City next() {
+                City city;
+                if (edgeIterator == null) {
+                    city = Node.this.city;
+                    edgeIterator = Node.this.edges.iterator();
+                    return city;
+                }
+
+                if (innerIterator == null || !innerIterator.hasNext()) {
+                    if (edgeIterator.hasNext()) {
+                        Node nextNode = edgeIterator.next();
+                        innerIterator = nextNode.iterator();
+                    } else {
+                        throw new NoSuchElementException();
+                    }
+                }
+                if (innerIterator.hasNext()) {
+                    return innerIterator.next();
+                }
+
+                throw new NoSuchElementException();
+            }
+        }
+    }
+
+    public String toString() {
+        return String.format("[%s] with return %s",
+                StreamSupport.stream(this.spliterator(), false)
+                        .map(String::valueOf).collect(Collectors.joining(", ")),
+                this.root == null ? "null" : this.root.getCity()
+        );
+    }
+}
+

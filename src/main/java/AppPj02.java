@@ -169,11 +169,17 @@ public class AppPj02 {
         formattedLogger.infof("3. Standard Nearest Neighbor Algorithm (Greedy)\n%s\n",
                 algorithmNearestNeighbor.toString());
 
+        formattedLogger.warningf("4. MSP\n");
+        // JFrameWeightedGraphWithMSP
+        JFrameWeightedGraphWithMSP frameWeightedGraphWithMSP = new JFrameWeightedGraphWithMSP(cities, adjacencyDistanceMatrix);
+
 //        formattedLogger.warningf("1. Nearest Neighbor Algorithm (Greedy)\n");
 //        formattedLogger.warningf("2. Nearest Insertion Algorithm\n");
 //        formattedLogger.warningf("3. Farthest Insertion Algorithm\n");
 //        formattedLogger.warningf("4. Minimum Spanning Tree Algorithm\n");
 //        formattedLogger.warningf("5. Brute Force Algorithm\n");
+        AlgorithmMSP algorithmMSP = new AlgorithmMSP(cities.get('A'), new LinkedHashMap<>(cities));
+        formattedLogger.warningf("Prim-Based MSP 2\n");
 
     }
 
@@ -184,7 +190,7 @@ public class AppPj02 {
         int bestDistance = Integer.MAX_VALUE, tempDistance;
         for(City city: sortedAdjacency.keySet()){
             City tempCity2 = sortedAdjacency.get(city).getFirst();
-            tempDistance = City.distanceEigenvalue(city, tempCity2);
+            tempDistance = City.distanceEigenValue(city, tempCity2);
             if (city1 == null || city2 == null || tempDistance < bestDistance) {
                 bestDistance = tempDistance;
                 city1 = city;
@@ -209,8 +215,8 @@ public class AppPj02 {
         int bestDistanceEigenvalue = Integer.MAX_VALUE;
         City selectedCity = null, targetCity = null;
         for(City temp: availableCitiesList.values()){
-            int distance1 = City.distanceEigenvalue(firstCity, temp);
-            int distance2 = City.distanceEigenvalue(lastCity, temp);
+            int distance1 = City.distanceEigenValue(firstCity, temp);
+            int distance2 = City.distanceEigenValue(lastCity, temp);
             // System.out.printf("Double %d", Double.compare(Double.MIN_VALUE , Double.MAX_VALUE));
             if ( distance1 < bestDistanceEigenvalue) {
                 selectedCity = temp;

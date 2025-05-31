@@ -7,7 +7,7 @@ public class DefaultDoubleTableCellRenderer extends DefaultTableCellRenderer {
     @Override
     public void setValue(Object value) {
         if (value instanceof Double) {
-            setText( String.format("%07.4f", ((Double) value).doubleValue()) );
+            setText( String.format("%07.4f", (Double) value));
         } else {
             setText(value == null ? "" : value.toString());
         }
