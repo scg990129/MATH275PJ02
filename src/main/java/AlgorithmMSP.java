@@ -6,18 +6,16 @@ import java.util.stream.StreamSupport;
 public class AlgorithmMSP implements Iterable<City> {
 
     protected Node root;
-    protected Map<City, Node> rapidSet = new LinkedHashMap<>();
-    protected int sizeWithoutReturn = 0;
+    protected Map<City, Node> visitedCities = new LinkedHashMap<>();
     protected double totalDistance = 0.0f;
 
     // Prim-Based MSP
     public AlgorithmMSP(City startCity, Map <Character, City> availableCities) {
-        rapidSet.put(startCity, this.root = new Node(startCity));
-        sizeWithoutReturn = availableCities.size();
+        visitedCities.put(startCity, this.root = new Node(startCity));
 
         PriorityQueue <Edge> priorityQueue = new PriorityQueue<>();
         Set<City> unvisitedCities = new HashSet<>();
-        availableCities.values().parallelStream().filter(Predicate.not(startCity::equals))
+        availableCities.values().parallelStream().filter(Predicate.not(startCity::equals)) // Predicate.not(
                 .map( city -> new Edge(startCity, city))
                 .sequential().peek(priorityQueue::add)
                 .map(Edge::getTarget).forEach(unvisitedCities::add);
@@ -36,8 +34,8 @@ public class AlgorithmMSP implements Iterable<City> {
             initialMinimumSpanningTree(priorityQueue, unvisitedCities);
         } else {
             Node node = new Node(target);
-            rapidSet.put(target,node);
-            rapidSet.get(edge.getSource()).getEdges().add(node);
+            visitedCities.put(target, node);
+            visitedCities.get(edge.getSource()).getEdges().add(node);
             unvisitedCities.parallelStream().map(city -> new Edge(target, city))
                     .forEach(priorityQueue::add);
             initialMinimumSpanningTree(priorityQueue, unvisitedCities);
@@ -45,7 +43,7 @@ public class AlgorithmMSP implements Iterable<City> {
     }
 
     public int size() {
-        return rapidSet.size() + (root == null ? 0 : 1);
+        return visitedCities.size() + (root == null ? 0 : 1);
     }
 
     public double getTotalDistance(){
@@ -88,13 +86,13 @@ public class AlgorithmMSP implements Iterable<City> {
             return target;
         }
 
-        public double getDistanceEigenValue() {
+        public int getDistanceEigenValue() {
             return distanceEigenValue;
         }
 
         @Override
         public int compareTo(Edge other) {
-            int distanceComparison = Integer.compare(this.distanceEigenValue, other.distanceEigenValue);
+            int distanceComparison = Integer.compare(this.getDistanceEigenValue(), other.getDistanceEigenValue());
             return distanceComparison != 0 ?
                     distanceComparison: this.equals(other) ? 0 :
                     this.source.getLabel() != other.source.getLabel() ?
@@ -107,8 +105,7 @@ public class AlgorithmMSP implements Iterable<City> {
 
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof Edge)) return false;
-            Edge edge = (Edge) o;
+            if (!(o instanceof Edge edge)) return false;
             return (Objects.equals(source, edge.source) && Objects.equals(target, edge.target)) ||
                    (Objects.equals(source, edge.target) && Objects.equals(target, edge.source));
         }
@@ -118,10 +115,6 @@ public class AlgorithmMSP implements Iterable<City> {
 
         City city;
         AbstractSet<Node> edges;
-
-        public AbstractSet<Node> getNodes(){
-            return edges;
-        }
 
         public Node(City city) {
             this.city = city;
@@ -151,9 +144,7 @@ public class AlgorithmMSP implements Iterable<City> {
 
             @Override
             public City next() {
-                City city;
                 if (edgeIterator == null) {
-                    city = Node.this.city;
                     edgeIterator = Node.this.edges.iterator();
                     return city;
                 }

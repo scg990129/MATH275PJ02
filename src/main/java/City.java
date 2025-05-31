@@ -84,6 +84,13 @@ public class City implements Comparable<City> {
         return Character.compare(this.label, other.label);
     }
 
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof City)) return false;
+        City other = (City) obj;
+        return this.label == other.label;// && this.x == other.x && this.y == other.y;
+    }
+
     public static class ComparatorCityDistance implements Comparator<City> {
 
         private City targetCity;
