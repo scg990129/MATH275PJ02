@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 
 public class JFrameTSPDistanceMatrix extends JFrame {
@@ -12,7 +13,7 @@ public class JFrameTSPDistanceMatrix extends JFrame {
 
     public JFrameTSPDistanceMatrix(Object[][] tableData, String[] columnNames) {
         super("TSP Distance Matrix");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 //        setSize(800, 600);
         setLocationRelativeTo(null);
 
@@ -26,21 +27,24 @@ public class JFrameTSPDistanceMatrix extends JFrame {
 //        }
 
         this.model = new ReadOnlyTableModel(tableData, columnNames);
-        JTable table = new JTable(model);
+        table = new JTable(model);
         // Beautify the table
         table.setFillsViewportHeight(true);
         table.setRowHeight(30);
         table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
         table.setFont(new Font("SansSerif", Font.PLAIN, 15));
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
         // Set renderer for all numeric columns
         for (int col = 1; col < table.getColumnCount(); col++) {
             table.getColumnModel().getColumn(col).setCellRenderer(rightRenderer);
         }
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
         scrollPane = new JScrollPane(table);
-        scrollPane.setPreferredSize(new Dimension(900, 210));
-        add(scrollPane);
+        scrollPane.setPreferredSize(new Dimension(900, 220));
+//        add(scrollPane);
+        this.add(scrollPane);
+
 
         this.pack();
 //        setResizable(false);

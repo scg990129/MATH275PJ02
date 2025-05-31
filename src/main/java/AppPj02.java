@@ -171,7 +171,7 @@ public class AppPj02 {
 
         formattedLogger.warningf("4. MSP\n");
         // JFrameWeightedGraphWithMSP
-        JFrameWeightedGraphWithMSP frameWeightedGraphWithMSP = new JFrameWeightedGraphWithMSP(cities, adjacencyDistanceMatrix);
+        JFrameWeightedGraphWithMSP frameWeightedGraphWithMSP = new JFrameWeightedGraphWithMSP(cities);
 
 //        formattedLogger.warningf("1. Nearest Neighbor Algorithm (Greedy)\n");
 //        formattedLogger.warningf("2. Nearest Insertion Algorithm\n");

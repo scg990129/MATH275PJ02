@@ -127,7 +127,7 @@ public class JFrameWeightedGraph extends JFrame {
 
         // Create the graph component (the display area)
         mxGraphComponent graphComponent = new mxGraphComponent(jgxAdapter);
-        graphComponent.setPreferredSize(new Dimension(800, 600)); // Set preferred size
+        // graphComponent.setPreferredSize(new Dimension(800, 600)); // Set preferred size
         graphComponent.setConnectable(false);                     // Prevent user from drawing new connections
         graphComponent.setToolTips(true);                         // Enable tooltips on cells
 
@@ -144,7 +144,7 @@ public class JFrameWeightedGraph extends JFrame {
 
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         pack(); // Pack components to their preferred size
-        setSize(800, 600); // Set a default size for the window
+        // setSize(800, 600); // Set a default size for the window
         setLocationRelativeTo(null); // Center the window
         setVisible(true);            // Make the window visible
     }

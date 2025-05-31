@@ -42,6 +42,15 @@ public class AlgorithmMSP implements Iterable<City> {
         }
     }
 
+    public Set<Edge> getMiniSpanningTreeEdge(){
+        Set<Edge> edges = new LinkedHashSet<>();
+        visitedCities.values().parallelStream()
+                .flatMap(source->source.edges.parallelStream().map(target->new Edge(source.getCity(),target.getCity())))
+                .sequential().forEach(edges::add);
+
+        return edges;
+    }
+
     public int size() {
         return visitedCities.size() + (root == null ? 0 : 1);
     }
@@ -90,6 +99,10 @@ public class AlgorithmMSP implements Iterable<City> {
             return distanceEigenValue;
         }
 
+        public double getDistance() {
+            return City.distanceTo(source, target);
+        }
+
         @Override
         public int compareTo(Edge other) {
             int distanceComparison = Integer.compare(this.getDistanceEigenValue(), other.getDistanceEigenValue());
@@ -114,18 +127,24 @@ public class AlgorithmMSP implements Iterable<City> {
     protected class Node implements Iterable<City> {
 
         City city;
-        AbstractSet<Node> edges;
+        Set<Node> edges;
 
         public Node(City city) {
             this.city = city;
             edges = new LinkedHashSet<>();
         }
 
-        public AbstractSet<Node> getEdges(){
+        public Set<Node> getEdges(){
             return edges;
         }
 
         public City getCity() { return city; }
+
+        public Set<Edge> getEdgesAsSet() {
+            return edges.stream()
+                    .map(node -> new Edge(this.city, node.getCity()))
+                    .collect(Collectors.toSet());
+        }
 
         @Override
         public Iterator<City> iterator() {
@@ -136,14 +155,21 @@ public class AlgorithmMSP implements Iterable<City> {
 
             protected Iterator<Node> edgeIterator = null;
             protected Iterator<City> innerIterator = null;
+            protected City rootCity = Node.this.city;
 
             @Override
             public boolean hasNext() {
-                return edgeIterator == null || edgeIterator.hasNext() || (innerIterator != null && innerIterator.hasNext());
+//                return rootCity != null ||
+                        return edgeIterator == null || edgeIterator.hasNext() || (innerIterator != null && innerIterator.hasNext());
             }
 
             @Override
             public City next() {
+//                if(rootCity != null) {
+//                    City root = rootCity;
+//                    rootCity = null; // Set to null to indicate that the root has been returned
+//                    return root;
+//                }
                 if (edgeIterator == null) {
                     edgeIterator = Node.this.edges.iterator();
                     return city;
