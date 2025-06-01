@@ -9,6 +9,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.WeightedMultigraph;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -89,6 +90,35 @@ public class JFrameWeightedGraphWithMSP extends JFrame {
         initUI();
     }
 
+    protected void createLegend(){
+        JLabel legend = new JLabel(
+                "<html>" +
+                        "<b>Legend</b><br>" +
+                        "● Vertex: City<br>" +
+                        "<span style='color:gray;'>⬤ Dashed gray line</span>: Possible Edge<br>" +
+                        "<span style='color:orange;'>→ Orange arrow</span>: MST mini spanning Tree<br>" +
+                        "<span style='color:red;'>→ Red arrow</span>: MST Cycle Solution from DFS of mini spanning Tree<br>" +
+                        "</html>"
+        );
+
+        legend.setOpaque(true);
+        legend.setBackground(Color.WHITE);
+        legend.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        legend.setSize(legend.getPreferredSize());
+//        legend.setBounds(10, 10, 200, 60);
+//        legend.setB
+
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(new Dimension(800, 600));
+        mxGraphComponent graphComponent = new mxGraphComponent(jgxAdapter);
+        graphComponent.setBounds(0, 0, 800, 600);
+        layeredPane.add(graphComponent, Integer.valueOf(0));
+        layeredPane.add(legend, Integer.valueOf(1));
+
+
+        this.getContentPane().add(layeredPane);
+    }
+
     protected void processCity(Map<Character, City> cities) {
         for (City c : cities.values()) {
             coordinates.put(c,
@@ -158,6 +188,9 @@ public class JFrameWeightedGraphWithMSP extends JFrame {
         // graphComponent.setPreferredSize(dimension); // Set preferred size
         graphComponent.setConnectable(true);                     // Prevent user from drawing new connections
         graphComponent.setToolTips(true);                         // Enable tooltips on cells
+//        graphComponent.setConnectable(false);         // no connections
+        graphComponent.setDragEnabled(false);         // no drag-and-drop
+        graphComponent.setEnabled(false);             // fully non-editable (optional)
 
         // Apply a layout algorithm
         // mxIGraphLayout layout = new mxCircleLayout(jgxAdapter); // Arrange nodes in a circle
@@ -169,6 +202,7 @@ public class JFrameWeightedGraphWithMSP extends JFrame {
 
         // Configure the JFrame
         getContentPane().add(graphComponent);
+        createLegend(); // Add legend to the graph component
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         // Pack components to their preferred size
         // setPreferredSize(dimension); // Set a default size for the window
