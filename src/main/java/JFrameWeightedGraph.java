@@ -35,7 +35,7 @@ public class JFrameWeightedGraph extends JFrame {
         for(City c: cities.values()){
             coordinates.put(String.valueOf(c.getLabel()),
                     new double[]{offsetX + c.getX() * scale, offsetY - c.getY() * scale});
-            graph.addVertex(String.valueOf( c.getLabel()));
+            graph.addVertex(String.valueOf(c.getLabel()));
         }
 
         for (int i = 0; i < adjacencyDistanceMatrix.length; i++) {

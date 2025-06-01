@@ -155,7 +155,7 @@ public class AlgorithmMSP implements Iterable<City> {
 
             protected Iterator<Node> edgeIterator = null;
             protected Iterator<City> innerIterator = null;
-            protected City rootCity = Node.this.city;
+//            protected City rootCity = Node.this.city;
 
             @Override
             public boolean hasNext() {
