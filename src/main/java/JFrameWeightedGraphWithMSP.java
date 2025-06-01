@@ -104,14 +104,14 @@ public class JFrameWeightedGraphWithMSP extends JFrame {
         legend.setOpaque(true);
         legend.setBackground(Color.WHITE);
         legend.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        legend.setSize(legend.getPreferredSize());
-//        legend.setBounds(10, 10, 200, 60);
+//        legend.setSize(legend.getPreferredSize());
+        legend.setBounds(10, 10, 300, 120);
 //        legend.setB
 
         JLayeredPane layeredPane = new JLayeredPane();
-        layeredPane.setPreferredSize(new Dimension(800, 600));
+        layeredPane.setPreferredSize(new Dimension(800, 860));
         mxGraphComponent graphComponent = new mxGraphComponent(jgxAdapter);
-        graphComponent.setBounds(0, 0, 800, 600);
+        graphComponent.setBounds(0, 0, 800, 860);
         layeredPane.add(graphComponent, Integer.valueOf(0));
         layeredPane.add(legend, Integer.valueOf(1));
 
@@ -150,9 +150,9 @@ public class JFrameWeightedGraphWithMSP extends JFrame {
                 String label = String.format("%.2f", graph.getEdgeWeight(e));
                 mxICell edgeCell = jgxAdapter.getEdgeToCellMap().get(e);
                 if (this.miniSpanningTree.contains(e)) {
-                    edgeCell.setStyle("strokeColor=orange;strokeWidth=1;dashed=true;dashPattern=5 5");
+                    edgeCell.setStyle("strokeColor=orange;strokeWidth=2;dashed=true;dashPattern=5 5");
                 } else if (selectedPathWithDFS.contains(e)) {
-                    edgeCell.setStyle("strokeColor=red;strokeWidth=3");
+                    edgeCell.setStyle("strokeColor=red;strokeWidth=4");
                 } else {
                     edgeCell.setStyle("strokeWidth=1;endArrow=none;strokeColor=grey;dashed=true;dashPattern=1 1");//STYLE_ENDARROW
                 }
