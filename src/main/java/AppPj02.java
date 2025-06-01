@@ -155,8 +155,7 @@ public class AppPj02 {
                 bestCombinationWithReturn.size(), stringBuilder.toString().trim()
         );
 
-        formattedLogger.infof("2. Double-Ended Nearest Neighbor Greedy Algorithm (Greedy)");
-        formattedLogger.infof("\n%s",sortedAdjacency.toString().replace("],","],\n"));
+        formattedLogger.infof("2. Sorted Adjacency link:%n%s",sortedAdjacency.toString().replace("],","],\n"));
 
         CitiesPathList greedyPath = generatePermutationsNearestNeighborGreedy(sortedAdjacency, new LinkedHashMap<>(cities));
         formattedLogger.infof("Double-Ended Nearest Neighbor Greedy Algorithm: %s (distance / with return: %6.4f / %6.4f)\n",
@@ -169,18 +168,15 @@ public class AppPj02 {
         formattedLogger.infof("3. Standard Nearest Neighbor Algorithm (Greedy)\n%s\n",
                 algorithmNearestNeighbor.toString());
 
-        formattedLogger.warningf("4. MSP\n");
         // JFrameWeightedGraphWithMSP
         JFrameWeightedGraphWithMSP frameWeightedGraphWithMSP = new JFrameWeightedGraphWithMSP(cities);
+        formattedLogger.infof("4. Prim-Based MST Approximation Algorithm%nCycle: %s%nTotal Distance: %02.4f", frameWeightedGraphWithMSP.getAlgorithmMSP(),frameWeightedGraphWithMSP.getAlgorithmMSP().getTotalDistance() );
 
 //        formattedLogger.warningf("1. Nearest Neighbor Algorithm (Greedy)\n");
 //        formattedLogger.warningf("2. Nearest Insertion Algorithm\n");
 //        formattedLogger.warningf("3. Farthest Insertion Algorithm\n");
 //        formattedLogger.warningf("4. Minimum Spanning Tree Algorithm\n");
 //        formattedLogger.warningf("5. Brute Force Algorithm\n");
-        AlgorithmMSP algorithmMSP = new AlgorithmMSP(cities.get('A'), new LinkedHashMap<>(cities));
-        formattedLogger.warningf("Prim-Based MSP 2\n");
-
     }
 
     // double-ended nearest neighbor heuristic.

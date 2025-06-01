@@ -1,6 +1,7 @@
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class AlgorithmNearestNeighbor {
 
@@ -25,7 +26,7 @@ public class AlgorithmNearestNeighbor {
         this.totalDistance += City.distanceTo(previousCity, this.startCity); // Return to start city
     }
 
-    protected AbstractSequentialList<City> getPath(City previousCity, AbstractSequentialList<City> availableCities) {
+    protected AbstractSequentialList<City> getPath(City previousCity, Collection<City> availableCities) {
         if (availableCities.size() == 1) { // base case
             return new LinkedList<>(availableCities);
         }
@@ -34,6 +35,9 @@ public class AlgorithmNearestNeighbor {
 
         AbstractSequentialList<City> availableCitiesNext = new LinkedList<>();
         Comparator<City> comparator = new City.ComparatorCityDistance(previousCity);
+        availableCities = availableCities.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedList::new));
         for (Iterator<City> i = availableCities.iterator(); i.hasNext(); ) {
             City tempCity = i.next();
             if (selectedCity == null || comparator.compare(tempCity, selectedCity) < 0) {

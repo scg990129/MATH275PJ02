@@ -32,7 +32,6 @@ public class JFrameWeightedGraphWithMSP extends JFrame {
         super("TSP City Graph Visualization - Undirected AND Weight Graph WITH MSP");
         this.algorithmMSP = new AlgorithmMSP(cities.get('A'), cities);
 
-
         processCity(cities);
 
         Set<City> tempSet = new LinkedHashSet<>(cities.values());
@@ -70,8 +69,9 @@ public class JFrameWeightedGraphWithMSP extends JFrame {
         miniSpanningTreeEdge.remove(MSPedge);
         availableEdge.remove(MSPedge);
 
-        miniSpanningTreeEdge.stream().sequential()
+        miniSpanningTreeEdge.stream().parallel()
                 .filter(Objects::nonNull)
+                .sequential()
                 .peek(availableEdge::remove)
                 .map(edge -> {
                     DefaultWeightedEdge e = graph.addEdge(edge.getSource().getLabel(), edge.getTarget().getLabel());
@@ -117,6 +117,10 @@ public class JFrameWeightedGraphWithMSP extends JFrame {
 
 
         this.getContentPane().add(layeredPane);
+    }
+
+    public AlgorithmMSP getAlgorithmMSP(){
+        return algorithmMSP;
     }
 
     protected void processCity(Map<Character, City> cities) {
