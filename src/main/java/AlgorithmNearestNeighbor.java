@@ -14,7 +14,7 @@ public class AlgorithmNearestNeighbor {
 //        SortedSet<City> cities = new TreeSet<>(new City.ComparatorCityDistance(this.startCity));
         LinkedList<City> availableCities = new LinkedList<>();
 
-        cityList.values().stream().parallel().filter(Predicate.not(this.startCity::equals))
+        cityList.values().stream().filter(Predicate.not(this.startCity::equals))
                 .forEach(availableCities::add);
 
         this.cityList = getPath(this.startCity, availableCities);
@@ -62,7 +62,6 @@ public class AlgorithmNearestNeighbor {
         answer.addFirst(selectedCity);
         return answer;
     }
-
 
     public City getStartnReturnCity(){
         return startCity;

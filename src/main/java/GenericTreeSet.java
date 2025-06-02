@@ -33,7 +33,7 @@ public class GenericTreeSet extends AbstractSet<City> implements Iterable<City>{
             Node miniNode = null;
             double minDistance = Double.MAX_VALUE;
             for(Node c : data) {
-                Optional<City> tempNode = temp.parallelStream().min(new City.ComparatorCityDistance(c.getCity()));
+                Optional<City> tempNode = temp.stream().min(new City.ComparatorCityDistance(c.getCity()));
                 if  (tempNode.isPresent() && City.distanceTo(tempNode.get(), c.getCity()) < minDistance) {
                     minDistance = City.distanceTo(tempNode.get(), c.getCity());
                     miniCity = tempNode.get();

@@ -15,19 +15,20 @@ public class AlgorithmMSP implements Iterable<City> {
 
         PriorityQueue <Edge> priorityQueue = new PriorityQueue<>();
         Set<City> unvisitedCities = new HashSet<>();
-        availableCities.values().parallelStream().filter(Predicate.not(startCity::equals)) // Predicate.not(
+        availableCities.values().stream().filter(Predicate.not(startCity::equals)) // Predicate.not(
                 .map( city -> new Edge(startCity, city))
-                .sequential().peek(priorityQueue::add)
+                .peek(priorityQueue::add)
                 .map(Edge::getTarget).forEach(unvisitedCities::add);
 
         initialMinimumSpanningTree(priorityQueue, unvisitedCities);
     }
 
     protected void initialMinimumSpanningTree(PriorityQueue<Edge> priorityQueue, Set<City> unvisitedCities) {
-        if (unvisitedCities == null || unvisitedCities.isEmpty()) {
+        if (unvisitedCities == null || unvisitedCities.isEmpty()) { // base case
             return; // No more edges or cities to visit
         }
 
+        // recursive case
         Edge edge = priorityQueue.poll();
         City target = edge.getTarget();
         if (!unvisitedCities.removeIf(target::equals)) {
@@ -36,7 +37,7 @@ public class AlgorithmMSP implements Iterable<City> {
             Node node = new Node(target);
             visitedCities.put(target, node);
             visitedCities.get(edge.getSource()).getEdges().add(node);
-            unvisitedCities.parallelStream().map(city -> new Edge(target, city))
+            unvisitedCities.stream().map(city -> new Edge(target, city))
                     .forEach(priorityQueue::add);
             initialMinimumSpanningTree(priorityQueue, unvisitedCities);
         }
@@ -44,8 +45,8 @@ public class AlgorithmMSP implements Iterable<City> {
 
     public Set<Edge> getMiniSpanningTreeEdge(){
         Set<Edge> edges = new LinkedHashSet<>();
-        visitedCities.values().parallelStream()
-                .flatMap(source->source.edges.parallelStream().map(target->new Edge(source.getCity(),target.getCity())))
+        visitedCities.values().stream()
+                .flatMap(source->source.edges.stream().map(target->new Edge(source.getCity(),target.getCity())))
                 .sequential().forEach(edges::add);
 
         return edges;

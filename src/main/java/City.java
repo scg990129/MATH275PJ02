@@ -105,9 +105,9 @@ public class City implements Comparable<City> {
 
         @Override
         public int compare(City o1, City o2) {
-
             int i = Integer.compare(distanceEigenValue(targetCity, o1), distanceEigenValue(targetCity, o2));
-            return i != 0 ? i : Character.compare(Character.toUpperCase(o1.label), Character.toUpperCase(o2.label));
+            return i != 0 ? i :
+                     Character.compare(Character.toUpperCase(o1.label), Character.toUpperCase(o2.label));
         }
     }
 

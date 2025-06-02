@@ -11,7 +11,6 @@ import org.jgrapht.graph.WeightedMultigraph;
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
-import java.util.function.Predicate;
 
 public class JFrameWeightedGraphWithMSP extends JFrame {
     private static final long serialVersionUID = 1L; // Recommended for JFrame serialization
@@ -37,10 +36,9 @@ public class JFrameWeightedGraphWithMSP extends JFrame {
         Set<City> tempSet = new LinkedHashSet<>(cities.values());
         for (City source : cities.values()) {
             tempSet.remove(source);
-            tempSet.parallelStream()
+            tempSet.stream()
 //                    .filter(Predicate.not(source::equals))
                     .map(target -> new AlgorithmMSP.Edge(source, target))
-                    .sequential()
 //                    .peek(edge -> miniSpanningTree.add(graph.addEdge(edge.getSource().getLabel(), edge.getTarget().getLabel())))
                     // DefaultWeightedEdge edge = graph.addEdge(sourceCity, targetCity);
                     .forEach(availableEdge::add);
@@ -69,7 +67,7 @@ public class JFrameWeightedGraphWithMSP extends JFrame {
         miniSpanningTreeEdge.remove(MSPedge);
         availableEdge.remove(MSPedge);
 
-        miniSpanningTreeEdge.stream().parallel()
+        miniSpanningTreeEdge.stream()
                 .filter(Objects::nonNull)
                 .sequential()
                 .peek(availableEdge::remove)
@@ -84,13 +82,13 @@ public class JFrameWeightedGraphWithMSP extends JFrame {
                 .forEach(miniSpanningTree::add);
 
         availableEdge.forEach(edge -> {
-                            Optional<DefaultWeightedEdge> oe = Optional.of(graph.addEdge(edge.getSource().getLabel(), edge.getTarget().getLabel()));
-                            oe.ifPresent(e -> graph.setEdgeWeight(e, edge.getDistance()));
-                        });
+            Optional<DefaultWeightedEdge> oe = Optional.of(graph.addEdge(edge.getSource().getLabel(), edge.getTarget().getLabel()));
+            oe.ifPresent(e -> graph.setEdgeWeight(e, edge.getDistance()));
+        });
         initUI();
     }
 
-    protected void createLegend(){
+    protected void createLegend() {
         JLabel legend = new JLabel(
                 "<html>" +
                         "<b>Legend</b><br>" +
@@ -119,7 +117,7 @@ public class JFrameWeightedGraphWithMSP extends JFrame {
         this.getContentPane().add(layeredPane);
     }
 
-    public AlgorithmMSP getAlgorithmMSP(){
+    public AlgorithmMSP getAlgorithmMSP() {
         return algorithmMSP;
     }
 
@@ -154,7 +152,7 @@ public class JFrameWeightedGraphWithMSP extends JFrame {
                 String label = String.format("%.2f", graph.getEdgeWeight(e));
                 mxICell edgeCell = jgxAdapter.getEdgeToCellMap().get(e);
                 if (this.miniSpanningTree.contains(e)) {
-                    edgeCell.setStyle("strokeColor=orange;strokeWidth=2;dashed=true;dashPattern=5 5");
+                    edgeCell.setStyle("strokeColor=orange;endArrow=none;strokeWidth=2;dashed=true;dashPattern=5 5");
                 } else if (selectedPathWithDFS.contains(e)) {
                     edgeCell.setStyle("strokeColor=red;strokeWidth=4");
                 } else {

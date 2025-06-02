@@ -2,6 +2,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -105,40 +107,18 @@ public class AppPj02 {
         SequencedSet<CitiesPathList> combinations = generatePermutations(new LinkedHashMap<>(cities));
         sb.setLength(0);
         List<CitiesPathList> bestCombination = new LinkedList<>();
-        Optional<Double> bestDistance = Optional.empty();
+        AtomicReference<Double> bestDistance = new AtomicReference<>();
         List<CitiesPathList> bestCombinationWithReturn = new LinkedList<>();
-        Optional<Double> bestDistanceWithReturn = Optional.empty();
-        for (CitiesPathList combination : combinations) {
-            double totalDistance = combination.getTotalDistance();
-            double totalDistanceWithReturn = combination.getTotalDistanceWithReturn();
+        AtomicReference<Double> bestDistanceWithReturn = new AtomicReference<>();
+        getBestCombinationForBruteForce(combinations,
+                bestDistance, bestCombination,
+                bestDistanceWithReturn, bestCombinationWithReturn);
+        combinations.stream()
+                .map(p->String.format("path: %s (distance: %02.4f, with return (%s): %02.4f)",
+                        p,p.getTotalDistance(),p.getFirst().getLabel(),p.getTotalDistanceWithReturn() ))
+                .forEach(s -> sb.append(s).append('\n'));
 
-            int doubleCompare = City.compareDistance(totalDistance, bestDistance.orElse(Double.MAX_VALUE));
-            if (bestCombination.isEmpty() || doubleCompare <= 0) {
-                if(doubleCompare != 0)
-                    bestCombination.clear();
-
-                bestCombination.add(combination);
-                bestDistance = Optional.of(totalDistance);
-            }
-            doubleCompare = City.compareDistance(totalDistanceWithReturn, bestDistanceWithReturn.orElse(Double.MAX_VALUE));
-            if (bestCombinationWithReturn.isEmpty() || doubleCompare <= 0) {
-                if(doubleCompare != 0){
-                    bestCombinationWithReturn.clear();
-//                    formattedLogger.warningf("totalDistanceWithReturn (%d): %f, %f, %s, %f",doubleCompare, totalDistanceWithReturn, bestDistanceWithReturn.orElse(Double.MAX_VALUE), String.valueOf( combination),
-//                            bestDistanceWithReturn.orElse(Double.MAX_VALUE) - totalDistanceWithReturn
-//                            );
-                }
-
-                bestCombinationWithReturn.add(combination);
-                bestDistanceWithReturn = Optional.of(totalDistanceWithReturn);
-            }
-
-            sb.append(String.format("%s (return city: %c): %6.4f (with return: %6.4f)\n",
-                    combination, combination.getFirst().getLabel(),
-                    totalDistance, totalDistanceWithReturn
-            ));
-        }
-        formattedLogger.infof("%d path combinations of %d cities: \n%s\n",
+        formattedLogger.infof("Brute Force Algorithm: : %d paths combinations of %d cities: \n%s\n",
                 combinations.size(), cities.size(), sb.toString().trim());
         StringBuilder stringBuilder = new StringBuilder();
         for (CitiesPathList combination : bestCombinationWithReturn) {
@@ -148,7 +128,7 @@ public class AppPj02 {
             ));
         }
         // D F E B C A
-        formattedLogger.infof("\nThe best %d path is (with distance: %6.4f):\n%s\n" +
+        formattedLogger.infof("\nBrute Force Algorithm: The best %d paths is (with distance: %6.4f):\n%s\n" +
                         "The best %d cycles for start and return: \n%s",
                 bestCombination.size(), bestDistance.get().doubleValue(),
                 bestCombination.toString().replace(",", ",\n"),
@@ -157,11 +137,11 @@ public class AppPj02 {
 
         formattedLogger.infof("2. Sorted Adjacency link:%n%s",sortedAdjacency.toString().replace("],","],\n"));
 
-        CitiesPathList greedyPath = generatePermutationsNearestNeighborGreedy(sortedAdjacency, new LinkedHashMap<>(cities));
-        formattedLogger.infof("Double-Ended Nearest Neighbor Greedy Algorithm: %s (distance / with return: %6.4f / %6.4f)\n",
-                greedyPath.toString().replace(",", ",\n"),
-                        greedyPath.getTotalDistance(), greedyPath.getTotalDistanceWithReturn()
-                );
+//        CitiesPathList greedyPath = generatePermutationsNearestNeighborGreedy(sortedAdjacency, new LinkedHashMap<>(cities));
+//        formattedLogger.infof("Double-Ended Nearest Neighbor Greedy Algorithm: %s (distance / with return: %6.4f / %6.4f)\n",
+//                greedyPath.toString().replace(",", ",\n"),
+//                        greedyPath.getTotalDistance(), greedyPath.getTotalDistanceWithReturn()
+//                );
 
         AlgorithmNearestNeighbor algorithmNearestNeighbor = new AlgorithmNearestNeighbor(
                 cities.get('A'), new LinkedHashMap<>(cities));
@@ -172,14 +152,42 @@ public class AppPj02 {
         JFrameWeightedGraphWithMSP frameWeightedGraphWithMSP = new JFrameWeightedGraphWithMSP(cities);
         formattedLogger.infof("4. Prim-Based MST Approximation Algorithm%nCycle: %s%nTotal Distance: %02.4f", frameWeightedGraphWithMSP.getAlgorithmMSP(),frameWeightedGraphWithMSP.getAlgorithmMSP().getTotalDistance() );
 
-//        formattedLogger.warningf("1. Nearest Neighbor Algorithm (Greedy)\n");
-//        formattedLogger.warningf("2. Nearest Insertion Algorithm\n");
-//        formattedLogger.warningf("3. Farthest Insertion Algorithm\n");
-//        formattedLogger.warningf("4. Minimum Spanning Tree Algorithm\n");
-//        formattedLogger.warningf("5. Brute Force Algorithm\n");
+    }
+
+    public static void getBestCombinationForBruteForce(SequencedSet<CitiesPathList> permutations,
+                                                       AtomicReference<Double> bestDistance, List<CitiesPathList> bestCombination,
+                                                       AtomicReference<Double> bestDistanceWithReturn, List<CitiesPathList> bestCombinationWithReturn) {
+        Optional<Double> bestDistanceTemp = Optional.empty();
+        Optional<Double> bestDistanceWithReturnTemp = Optional.empty();
+
+        for (CitiesPathList combination : permutations) {
+            double totalDistance = combination.getTotalDistance();
+            double totalDistanceWithReturn = combination.getTotalDistanceWithReturn();
+
+            int doubleCompare = City.compareDistance(totalDistance, bestDistanceTemp.orElse(Double.MAX_VALUE));
+            if (bestCombination.isEmpty() || doubleCompare <= 0) {
+                if(doubleCompare != 0)
+                    bestCombination.clear();
+
+                bestCombination.add(combination);
+                bestDistanceTemp = Optional.of(totalDistance);
+            }
+            doubleCompare = City.compareDistance(totalDistanceWithReturn, bestDistanceWithReturnTemp.orElse(Double.MAX_VALUE));
+            if (bestCombinationWithReturn.isEmpty() || doubleCompare <= 0) {
+                if(doubleCompare != 0){
+                    bestCombinationWithReturn.clear();
+                }
+
+                bestCombinationWithReturn.add(combination);
+                bestDistanceWithReturnTemp = Optional.of(totalDistanceWithReturn);
+            }
+        }
+        bestDistance.set(bestDistanceTemp.orElse(Double.MAX_VALUE));
+        bestDistanceWithReturn.set(bestDistanceWithReturnTemp.orElse(Double.MAX_VALUE));
     }
 
     // double-ended nearest neighbor heuristic.
+    @Deprecated
     public static CitiesPathList generatePermutationsNearestNeighborGreedy(Map<City, SortedSet<City>> sortedAdjacency, SequencedMap<Character, City> availableCitiesList){
         SequencedMap<Character, City> temp = new LinkedHashMap<>(availableCitiesList);
         City city1 = null, city2 = null ;
@@ -187,7 +195,7 @@ public class AppPj02 {
         for(City city: sortedAdjacency.keySet()){
             City tempCity2 = sortedAdjacency.get(city).getFirst();
             tempDistance = City.distanceEigenValue(city, tempCity2);
-            if (city1 == null || city2 == null || tempDistance < bestDistance) {
+            if (city1 == null || tempDistance < bestDistance) {
                 bestDistance = tempDistance;
                 city1 = city;
                 city2 = tempCity2;
@@ -196,11 +204,12 @@ public class AppPj02 {
         temp.remove(city1 == null ? Character.MAX_VALUE :city1.getLabel());
         temp.remove(city2 == null ? Character.MAX_VALUE :city2.getLabel());
 
-        formattedLogger.infof("first 2 city: %c %c (DistanceEigenvalue: %d)\n", city1.getLabel(), city2.getLabel(), bestDistance);
+        // formattedLogger.infof("first 2 city: %c %c (DistanceEigenvalue: %d)\n", city1.getLabel(), city2.getLabel(), bestDistance);
 
         return generatePermutationsNearestNeighborGreedy(new CitiesPathList().addCity(city1).addCity(city2), temp);
     }
 
+    @Deprecated
     public static CitiesPathList generatePermutationsNearestNeighborGreedy(CitiesPathList inputCities, SequencedMap<Character, City> availableCitiesList){
         if (availableCitiesList.isEmpty()) {
             return inputCities;
@@ -226,13 +235,13 @@ public class AppPj02 {
             }
         }
 
-        if (targetCity == firstCity) {
-            formattedLogger.infof("add first: %s (DistanceEigenvalue: %d)\n", selectedCity.getLabel(), bestDistanceEigenvalue);
-            inputCities.addFirst(selectedCity);
-        }else {
-            formattedLogger.infof("add last: %s (DistanceEigenvalue: %d)\n", selectedCity.getLabel(), bestDistanceEigenvalue);
-            inputCities.addLast(selectedCity);
-        }
+//        if (targetCity == firstCity) {
+//            formattedLogger.infof("add first: %s (DistanceEigenvalue: %d)\n", selectedCity.getLabel(), bestDistanceEigenvalue);
+//            inputCities.addFirst(selectedCity);
+//        }else {
+//            formattedLogger.infof("add last: %s (DistanceEigenvalue: %d)\n", selectedCity.getLabel(), bestDistanceEigenvalue);
+//            inputCities.addLast(selectedCity);
+//        }
         availableCitiesList.remove(selectedCity == null? Character.MAX_VALUE : selectedCity.getLabel());
 
         return generatePermutationsNearestNeighborGreedy(inputCities, availableCitiesList);
@@ -250,9 +259,9 @@ public class AppPj02 {
         for(Character c: labels){
             SequencedMap<Character, City> availableCitiesListCopy = new LinkedHashMap<>(availableCitiesList);
             City city = availableCitiesListCopy.remove(c);
-            for(CitiesPathList t : generatePermutations(availableCitiesListCopy)){
-                t.add(city);
-                result.add(t);
+            for(CitiesPathList path : generatePermutations(availableCitiesListCopy)){
+                path.add(city);
+                result.add(path);
             }
         }
         return result;

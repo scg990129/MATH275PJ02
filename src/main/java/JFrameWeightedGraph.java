@@ -1,3 +1,4 @@
+import com.mxgraph.model.mxICell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
@@ -100,8 +101,9 @@ public class JFrameWeightedGraph extends JFrame {
             // Set edge labels to display weights
             for (DefaultWeightedEdge e : graph.edgeSet()) {
                 String label = String.format("%.2f", graph.getEdgeWeight(e));
-                Object edgeCell = jgxAdapter.getEdgeToCellMap().get(e);
+                mxICell edgeCell = jgxAdapter.getEdgeToCellMap().get(e);
                 jgxAdapter.getModel().setValue(edgeCell, label);
+                edgeCell.setStyle("endArrow=none");
             }
         } finally {
             model.endUpdate();
@@ -119,7 +121,9 @@ public class JFrameWeightedGraph extends JFrame {
         edgeStyle.put(mxConstants.STYLE_LABEL_BACKGROUNDCOLOR, "#FFFFFF"); // White background for label
         edgeStyle.put(mxConstants.STYLE_STROKECOLOR, "#6482B9");           // Edge color
         edgeStyle.put(mxConstants.STYLE_FONTCOLOR, "#000000");             // Font color for label
-        edgeStyle.put(mxConstants.STYLE_FONTSIZE, "10");                   // Font size
+        edgeStyle.put(mxConstants.STYLE_FONTSIZE, "10");
+        edgeStyle.put(mxConstants.STYLE_ENDARROW, mxConstants.NONE);
+        // Font size
         stylesheet.putCellStyle("edgeStyle", edgeStyle);                   // Apply this style globally or to specific edges
 
         // Set the vertex and edge styles
