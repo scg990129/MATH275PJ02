@@ -24,22 +24,19 @@ public class AlgorithmMSP implements Iterable<City> {
     }
 
     protected void initialMinimumSpanningTree(PriorityQueue<Edge> priorityQueue, Set<City> unvisitedCities) {
-        if (unvisitedCities == null || unvisitedCities.isEmpty()) { // base case
-            return; // No more edges or cities to visit
-        }
-
-        // recursive case
-        Edge edge = priorityQueue.poll();
-        City target = edge.getTarget();
-        if (!unvisitedCities.removeIf(target::equals)) {
-            initialMinimumSpanningTree(priorityQueue, unvisitedCities);
-        } else {
-            Node node = new Node(target);
-            visitedCities.put(target, node);
-            visitedCities.get(edge.getSource()).getEdges().add(node);
-            unvisitedCities.stream().map(city -> new Edge(target, city))
-                    .forEach(priorityQueue::add);
-            initialMinimumSpanningTree(priorityQueue, unvisitedCities);
+        while (!unvisitedCities.isEmpty()) {
+            Edge edge = priorityQueue.poll();
+            City target = edge.getTarget();
+            if (unvisitedCities.removeIf(target::equals)) {
+//                initialMinimumSpanningTree(priorityQueue, unvisitedCities);
+//            } else {
+                Node node = new Node(target);
+                visitedCities.put(target, node);
+                visitedCities.get(edge.getSource()).getEdges().add(node);
+                unvisitedCities.stream().map(city -> new Edge(target, city))
+                        .forEach(priorityQueue::add);
+//                initialMinimumSpanningTree(priorityQueue, unvisitedCities);
+            }
         }
     }
 
