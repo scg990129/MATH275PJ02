@@ -90,9 +90,8 @@ public class AppPj02 {
         sb.setLength(0);
         sb.append( "Adjacency list:\n");
         for (City city : sortedAdjacency.keySet()) {
-            sb.append(String.format("%20s: ", city));
-
-            sb.append(String.format("%s \n", String.join( "<<",
+            sb.append(String.format("Vertex %20s: -> ", city));
+            sb.append(String.format("[%s]\n", String.join( ", ",
                     sortedAdjacency.get(city).stream()
                             .filter(city1 -> city1 != city)
                             .map(s->String.format("%20s ", s))
